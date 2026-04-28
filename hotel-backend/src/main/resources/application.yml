@@ -1,0 +1,22 @@
+server:
+  port: 8080
+
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:mysql://localhost:3306/hotel?useUnicode=true&characterEncoding=utf8&connectionCollation=utf8mb3_general_ci&serverTimezone=Asia/Shanghai}
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:123456}
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:schema.sql
+
+mybatis:
+  configuration:
+    map-underscore-to-camel-case: true
+
+sa-token:
+  token-name: satoken
+  timeout: 86400
+  is-share: false
+
