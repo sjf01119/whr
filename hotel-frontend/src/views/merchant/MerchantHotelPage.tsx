@@ -3,6 +3,7 @@ import { ElButton, ElCard, ElForm, ElFormItem, ElInput, ElMessage, ElSwitch, ElU
 import { Plus } from '@element-plus/icons-vue'
 import { http } from '@/lib/http'
 import type { ApiResponse } from '@/types/api'
+import './MerchantHotelPage.css'
 
 type Hotel = {
   id: number
@@ -80,68 +81,122 @@ export default defineComponent({
 
     onMounted(load)
 
+    function renderLabel(text: string, required = false) {
+      return (
+        <span class="field-label">
+          {required ? <span class="required-mark">*</span> : null}
+          {text}
+        </span>
+      )
+    }
+
     return () => (
-      <div v-loading={loading.value}>
-        <ElCard style={{ marginBottom: '20px' }}>
-          <div style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '20px' }}>酒店信息维护</div>
-          
-          <ElForm ref={formRef} model={hotel} rules={rules} labelWidth="100px" style="max-width: 800px">
-            <div style={{ fontWeight: 'bold', marginBottom: '16px', color: '#409EFF' }}>基础信息区</div>
-            <ElFormItem label="酒店名称" prop="name">
-              <ElInput v-model={hotel.name} placeholder="请输入酒店全称" />
-            </ElFormItem>
-            <ElFormItem label="详细地址" prop="address">
-              <ElInput v-model={hotel.address} placeholder="请输入详细地址，精确到门牌号" />
-            </ElFormItem>
-            <ElFormItem label="联系电话" prop="phone">
-              <ElInput v-model={hotel.phone} placeholder="请输入酒店前台联系电话" />
-            </ElFormItem>
-            <ElFormItem label="配套设施" prop="facilities">
-              <ElInput v-model={hotel.facilities} placeholder="例如：免费WiFi, 免费停车, 健身房, 游泳池" />
-            </ElFormItem>
-            <ElFormItem label="完整简介" prop="description">
-              <ElInput v-model={hotel.description} type="textarea" rows={4} placeholder="请输入酒店的详细介绍" />
-            </ElFormItem>
+      <div class="merchant-hotel-page" v-loading={loading.value}>
+        <ElCard class="merchant-hotel-main-card">
+          <div class="merchant-page-title">酒店信息维护</div>
 
-            <div style={{ fontWeight: 'bold', margin: '32px 0 16px 0', color: '#409EFF' }}>图片上传区 (仅演示占位)</div>
-            <ElFormItem label="酒店封面图">
-              <ElUpload
-                action="#"
-                listType="picture-card"
-                autoUpload={false}
-                limit={1}
-              >
-                <ElIcon><Plus /></ElIcon>
-              </ElUpload>
-              <div style={{ fontSize: '12px', color: '#909399', marginLeft: '12px' }}>建议上传 800x600 比例的清晰大图</div>
-            </ElFormItem>
+          <ElForm ref={formRef} model={hotel} rules={rules} labelPosition="top" hideRequiredAsterisk class="merchant-hotel-form">
+            <ElCard class="section-card">
+              <div class="section-title">基础信息区</div>
+              <div class="basic-grid">
+                <ElFormItem prop="name" class="grid-item">
+                  {{
+                    label: () => renderLabel('酒店名称', true),
+                    default: () => <ElInput v-model={hotel.name} placeholder="请输入酒店全称" />,
+                  }}
+                </ElFormItem>
 
-            <div style={{ fontWeight: 'bold', margin: '32px 0 16px 0', color: '#409EFF' }}>营业状态区</div>
-            <ElFormItem label="营业状态">
-              <ElSwitch 
-                v-model={hotel.status} 
-                active-value="ONLINE" 
-                inactive-value="OFFLINE"
-                active-text="营业中"
-                inactive-text="已歇业"
-                inline-prompt
-                width={70}
-              />
-              <div style={{ fontSize: '12px', color: '#909399', marginTop: '8px', lineHeight: 1.5, width: '100%' }}>
-                当状态为「营业中」时，该酒店正常展示在用户端酒店列表。<br/>
-                当状态为「已歇业」时，该酒店从用户端隐藏，不影响已提交的有效订单。
+                <ElFormItem prop="phone" class="grid-item">
+                  {{
+                    label: () => renderLabel('联系电话', true),
+                    default: () => <ElInput v-model={hotel.phone} placeholder="请输入酒店前台联系电话" />,
+                  }}
+                </ElFormItem>
+
+                <ElFormItem prop="address" class="grid-item span-2">
+                  {{
+                    label: () => renderLabel('详细地址', true),
+                    default: () => <ElInput v-model={hotel.address} placeholder="请输入详细地址，精确到门牌号" />,
+                  }}
+                </ElFormItem>
+
+                <ElFormItem prop="facilities" class="grid-item span-2">
+                  {{
+                    label: () => renderLabel('配套设施'),
+                    default: () => <ElInput v-model={hotel.facilities} placeholder="例如：免费WiFi, 免费停车, 健身房, 游泳池" />,
+                  }}
+                </ElFormItem>
+
+                <ElFormItem prop="description" class="grid-item span-2">
+                  {{
+                    label: () => renderLabel('完整简介', true),
+                    default: () => (
+                      <ElInput
+                        v-model={hotel.description}
+                        type="textarea"
+                        rows={5}
+                        placeholder="请输入酒店的详细介绍"
+                      />
+                    ),
+                  }}
+                </ElFormItem>
               </div>
-            </ElFormItem>
+            </ElCard>
 
-            <ElFormItem style={{ marginTop: '32px' }}>
-              <ElButton type="primary" size="large" loading={saving.value} onClick={save} style={{ width: '200px' }}>
+            <ElCard class="section-card">
+              <div class="section-title">图片上传区</div>
+              <div class="upload-row">
+                <ElFormItem class="upload-form-item">
+                  {{
+                    label: () => renderLabel('酒店封面图'),
+                    default: () => (
+                      <div class="upload-wrap">
+                        <ElUpload action="#" listType="picture-card" autoUpload={false} limit={1} class="hotel-upload">
+                          <ElIcon><Plus /></ElIcon>
+                        </ElUpload>
+                        <div class="upload-tip">建议上传 800x600 比例的清晰大图，展示效果更佳。</div>
+                      </div>
+                    ),
+                  }}
+                </ElFormItem>
+              </div>
+            </ElCard>
+
+            <ElCard class="section-card">
+              <div class="section-title">营业状态区</div>
+              <ElFormItem class="status-form-item">
+                {{
+                  label: () => renderLabel('营业状态'),
+                  default: () => (
+                    <>
+                      <ElSwitch
+                        class="status-switch"
+                        v-model={hotel.status}
+                        active-value="ONLINE"
+                        inactive-value="OFFLINE"
+                        active-text="营业中"
+                        inactive-text="已歇业"
+                        inline-prompt
+                        width={74}
+                      />
+                      <div class="status-tip">
+                        <div>当状态为「营业中」时，该酒店会正常展示在用户端酒店列表。</div>
+                        <div>当状态为「已歇业」时，该酒店将从用户端隐藏，不影响已提交的有效订单。</div>
+                      </div>
+                    </>
+                  ),
+                }}
+              </ElFormItem>
+            </ElCard>
+
+            <div class="submit-wrap">
+              <ElButton type="primary" class="hotel-submit-btn" loading={saving.value} onClick={save}>
                 保存修改
               </ElButton>
-            </ElFormItem>
+            </div>
           </ElForm>
         </ElCard>
       </div>
     )
   },
 })
-

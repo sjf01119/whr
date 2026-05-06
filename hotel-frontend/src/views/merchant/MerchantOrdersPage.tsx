@@ -1,7 +1,9 @@
 import { defineComponent, onMounted, ref, computed } from 'vue'
-import { ElButton, ElCard, ElMessage, ElTag, ElTabs, ElTabPane, ElEmpty, ElDialog, ElDescriptions, ElDescriptionsItem, ElMessageBox } from 'element-plus'
+import { ElButton, ElCard, ElDescriptions, ElDescriptionsItem, ElDialog, ElEmpty, ElMessage, ElMessageBox } from 'element-plus'
 import { http } from '@/lib/http'
 import type { ApiResponse, PageResponse } from '@/types/api'
+import { CopyDocument } from '@element-plus/icons-vue'
+import './MerchantOrdersPage.css'
 
 type Order = {
   id: number
@@ -15,12 +17,12 @@ type Order = {
   createdAt: string
 }
 
-const statusMap: Record<string, { label: string; type: any }> = {
-  CREATED: { label: '待处理', type: 'warning' },
-  PAID: { label: '已确认', type: 'success' },
-  CHECKED_IN: { label: '已入住', type: 'primary' },
-  COMPLETED: { label: '已完成', type: 'info' },
-  CANCELED: { label: '已取消', type: 'info' },
+const statusMap: Record<string, { label: string; cls: string }> = {
+  CREATED: { label: '待处理', cls: 'status-warning' },
+  PAID: { label: '已确认', cls: 'status-primary' },
+  CHECKED_IN: { label: '已入住', cls: 'status-primary' },
+  COMPLETED: { label: '已完成', cls: 'status-success' },
+  CANCELED: { label: '已取消', cls: 'status-danger' },
 }
 
 export default defineComponent({
@@ -85,6 +87,15 @@ export default defineComponent({
       await load()
     }
 
+    async function copyOrderNo(orderNo: string) {
+      try {
+        await navigator.clipboard.writeText(orderNo)
+        ElMessage.success('订单号已复制')
+      } catch {
+        ElMessage.error('复制失败，请手动复制')
+      }
+    }
+
     function showDetail(order: Order) {
       currentOrder.value = order
       detailVisible.value = true
@@ -98,59 +109,78 @@ export default defineComponent({
     onMounted(load)
 
     return () => (
-      <div>
-        <ElCard style={{ marginBottom: '20px' }}>
-          <ElTabs v-model={activeTab.value}>
-            <ElTabPane label="全部" name="ALL" />
-            <ElTabPane label="待处理" name="CREATED" />
-            <ElTabPane label="已确认" name="PAID" />
-            <ElTabPane label="已入住" name="CHECKED_IN" />
-            <ElTabPane label="已完成" name="COMPLETED" />
-            <ElTabPane label="已取消" name="CANCELED" />
-          </ElTabs>
+      <div class="merchant-orders-page">
+        <ElCard class="merchant-orders-card tabs-card">
+          <div class="filter-tabs">
+            {[
+              { key: 'ALL', label: '全部' },
+              { key: 'CREATED', label: '待处理' },
+              { key: 'PAID', label: '已确认' },
+              { key: 'CHECKED_IN', label: '已入住' },
+              { key: 'COMPLETED', label: '已完成' },
+              { key: 'CANCELED', label: '已取消' },
+            ].map((tab) => (
+              <button
+                key={tab.key}
+                class={`filter-tab ${activeTab.value === tab.key ? 'active' : ''}`}
+                onClick={() => {
+                  activeTab.value = tab.key
+                }}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
         </ElCard>
 
         <div v-loading={loading.value}>
           {filteredItems.value.length === 0 ? (
-            <ElEmpty description="暂无对应状态的订单" />
+            <ElCard class="merchant-orders-card empty-card">
+              <ElEmpty description="暂无对应状态的订单" />
+            </ElCard>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <div class="order-card-list">
               {filteredItems.value.map(order => {
-                const s = statusMap[order.status] || { label: order.status, type: 'info' }
+                const s = statusMap[order.status] || { label: order.status, cls: 'status-danger' }
                 return (
-                  <ElCard key={order.id} bodyStyle={{ padding: '20px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #ebeef5', paddingBottom: '12px', marginBottom: '12px' }}>
-                      <div style={{ fontSize: '13px', color: '#909399' }}>
-                        订单号：{order.orderNo} <span style={{ margin: '0 8px' }}>|</span> 下单时间：{order.createdAt?.replace('T', ' ')}
+                  <ElCard key={order.id} class="merchant-orders-card order-card">
+                    <div class="order-head">
+                      <div class="order-top-text">
+                        <span>订单号：{order.orderNo}</span>
+                        <button class="copy-btn" onClick={() => copyOrderNo(order.orderNo)} title="复制订单号">
+                          <el-icon><CopyDocument /></el-icon>
+                        </button>
+                        <span class="order-divider">|</span>
+                        <span>下单时间：{order.createdAt?.replace('T', ' ')}</span>
                       </div>
-                      <ElTag type={s.type} size="small">{s.label}</ElTag>
+                      <span class={`status-pill ${s.cls}`}>{s.label}</span>
                     </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                        <div style={{ fontSize: '16px', fontWeight: 'bold', color: '#303133' }}>下单用户：{order.username}</div>
-                        <div style={{ fontSize: '14px', color: '#606266' }}>{order.roomTypeName}</div>
-                        <div style={{ fontSize: '13px', color: '#909399' }}>
-                          入住：{order.checkinDate} <span style={{ margin: '0 4px' }}>至</span> 离店：{order.checkoutDate}
+                    <div class="order-body">
+                      <div class="order-info">
+                        <div class="order-strong">下单用户：{order.username}</div>
+                        <div class="order-strong">房型：{order.roomTypeName}</div>
+                        <div class="order-time">
+                          入住：{order.checkinDate} <span>至</span> 离店：{order.checkoutDate}
                         </div>
                       </div>
-                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '12px' }}>
-                        <div style={{ color: '#F56C6C', fontSize: '20px', fontWeight: 'bold' }}>
-                          <span style={{ fontSize: '14px' }}>￥</span>{order.amount}
+                      <div class="order-side">
+                        <div class="order-amount">
+                          ¥ {Number(order.amount).toFixed(2)}
                         </div>
-                        <div style={{ display: 'flex', gap: '10px' }}>
+                        <div class="order-actions">
                           {order.status === 'CREATED' && (
                             <>
-                              <ElButton size="small" type="success" plain onClick={() => acceptOrder(order.id)}>确认接单</ElButton>
-                              <ElButton size="small" type="danger" plain onClick={() => rejectOrder(order.id)}>拒绝接单</ElButton>
+                              <ElButton size="small" class="order-operate-btn success-btn" onClick={() => acceptOrder(order.id)}>确认接单</ElButton>
+                              <ElButton size="small" class="order-operate-btn danger-btn" onClick={() => rejectOrder(order.id)}>拒绝接单</ElButton>
                             </>
                           )}
                           {order.status === 'PAID' && (
-                            <ElButton size="small" type="primary" onClick={() => checkin(order.id)}>确认入住</ElButton>
+                            <ElButton size="small" class="order-operate-btn primary-btn" onClick={() => checkin(order.id)}>确认入住</ElButton>
                           )}
                           {order.status === 'CHECKED_IN' && (
-                            <ElButton size="small" type="warning" onClick={() => checkout(order.id)}>确认退房</ElButton>
+                            <ElButton size="small" class="order-operate-btn primary-btn" onClick={() => checkout(order.id)}>确认退房</ElButton>
                           )}
-                          <ElButton size="small" plain onClick={() => showDetail(order)}>查看详情</ElButton>
+                          <ElButton size="small" class="detail-btn" onClick={() => showDetail(order)}>查看详情</ElButton>
                         </div>
                       </div>
                     </div>
@@ -183,9 +213,9 @@ export default defineComponent({
               </ElDescriptionsItem>
               <ElDescriptionsItem label="订单总价">￥{currentOrder.value.amount}</ElDescriptionsItem>
               <ElDescriptionsItem label="订单状态">
-                <ElTag size="small" type={statusMap[currentOrder.value.status]?.type}>
+                <span class={`status-pill ${statusMap[currentOrder.value.status]?.cls || 'status-danger'}`}>
                   {statusMap[currentOrder.value.status]?.label || currentOrder.value.status}
-                </ElTag>
+                </span>
               </ElDescriptionsItem>
               <ElDescriptionsItem label="下单时间">{currentOrder.value.createdAt?.replace('T', ' ')}</ElDescriptionsItem>
             </ElDescriptions>
@@ -195,4 +225,3 @@ export default defineComponent({
     )
   },
 })
-

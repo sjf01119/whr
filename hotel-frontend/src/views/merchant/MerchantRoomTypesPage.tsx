@@ -8,18 +8,17 @@ import {
   ElInput,
   ElInputNumber,
   ElMessage,
-  ElTable,
-  ElTableColumn,
   ElEmpty,
   ElPopconfirm,
   ElTag,
   ElUpload,
   ElIcon
 } from 'element-plus'
-import { Plus } from '@element-plus/icons-vue'
+import { Delete, Edit, Plus } from '@element-plus/icons-vue'
 import { http } from '@/lib/http'
 import { getRoomTypeImage } from '@/lib/roomTypeImage'
 import type { ApiResponse } from '@/types/api'
+import './MerchantRoomTypesPage.css'
 
 type RoomType = {
   id: number
@@ -155,11 +154,12 @@ export default defineComponent({
     onMounted(load)
 
     return () => (
-      <div>
-        <ElCard style={{ marginBottom: '20px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div style={{ fontSize: '18px', fontWeight: 'bold' }}>房型管理</div>
-            <ElButton type="primary" onClick={add} size="large">
+      <div class="merchant-roomtypes-page">
+        <ElCard class="roomtypes-toolbar-card">
+          <div class="toolbar-row">
+            <div class="page-title">房型管理</div>
+            <ElButton type="primary" onClick={add} class="roomtypes-add-btn">
+              <el-icon><Plus /></el-icon>
               新增房型
             </ElButton>
           </div>
@@ -167,42 +167,55 @@ export default defineComponent({
 
         <div v-loading={loading.value}>
           {items.value.length === 0 ? (
-            <ElCard>
+            <ElCard class="roomtypes-empty-card">
               <ElEmpty description="暂无房型数据，请先新增房型" />
             </ElCard>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <div class="roomtypes-grid">
               {items.value.map(row => (
-                <ElCard key={row.id} bodyStyle={{ padding: '20px' }} shadow="hover">
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div style={{ display: 'flex', gap: '24px' }}>
-                      <img src={getRoomTypeImage(row.name)} alt={row.name} style={{ width: '120px', height: '120px', borderRadius: '6px', objectFit: 'cover' }} />
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                        <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#303133' }}>
-                          {row.name}
-                          {row.stock <= 0 && <ElTag type="danger" size="small" style={{ marginLeft: '8px' }}>已满房</ElTag>}
+                <ElCard key={row.id} class="roomtype-card" bodyStyle={{ padding: '24px' }}>
+                  <div class="roomtype-card-content">
+                    <div class="roomtype-main">
+                      <div class="roomtype-image-wrap">
+                        <img src={getRoomTypeImage(row.name)} alt={row.name} class="roomtype-image" />
+                      </div>
+                      <div class="roomtype-info">
+                        <div class="roomtype-name-line">
+                          <div class="roomtype-name">{row.name}</div>
+                          {row.stock <= 0 && <ElTag type="danger" size="small">已满房</ElTag>}
                         </div>
-                        <div style={{ display: 'flex', gap: '12px', fontSize: '13px', color: '#606266' }}>
+                        <div class="roomtype-meta">
                           <span>床型：大/双床</span>
                           <span>可住：2人</span>
                           <span>面积：25-30㎡</span>
                         </div>
-                        <div style={{ fontSize: '13px', color: '#909399' }}>设施：{row.facilitiesText}</div>
-                        <div style={{ marginTop: 'auto' }}>
-                          <span style={{ fontSize: '13px', color: row.stock > 0 ? '#67C23A' : '#F56C6C', fontWeight: 'bold' }}>
-                            当前总库存：{row.stock} 间
-                          </span>
-                        </div>
+                        <div class="roomtype-facilities">设施：{row.facilitiesText}</div>
+                        <div class="roomtype-stock">当前总库存：{row.stock} 间</div>
                       </div>
                     </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '16px' }}>
-                      <div style={{ color: '#F56C6C', fontSize: '24px', fontWeight: 'bold' }}>
-                        <span style={{ fontSize: '14px' }}>￥</span>{row.price} <span style={{ fontSize: '12px', color: '#909399', fontWeight: 'normal' }}>/ 晚</span>
+                    <div class="roomtype-side">
+                      <div class="roomtype-price">
+                        ¥ {row.price} <span>/ 晚</span>
                       </div>
-                      <div style={{ display: 'flex', gap: '10px' }}>
-                        <ElButton size="small" type="primary" plain onClick={() => edit(row)}>编辑房型</ElButton>
-                        <ElPopconfirm title="确定要删除该房型吗？如果有未完成的订单将无法删除。" confirmButtonText="删除" cancelButtonText="取消" onConfirm={() => remove(row.id)}>
-                          {{ reference: () => <ElButton size="small" type="danger" plain>删除房型</ElButton> }}
+                      <div class="roomtype-actions">
+                        <ElButton size="small" class="roomtype-edit-btn" onClick={() => edit(row)}>
+                          <el-icon><Edit /></el-icon>
+                          编辑房型
+                        </ElButton>
+                        <ElPopconfirm
+                          title="确定要删除该房型吗？如果有未完成的订单将无法删除。"
+                          confirmButtonText="删除"
+                          cancelButtonText="取消"
+                          onConfirm={() => remove(row.id)}
+                        >
+                          {{
+                            reference: () => (
+                              <ElButton size="small" class="roomtype-delete-btn">
+                                <el-icon><Delete /></el-icon>
+                                删除房型
+                              </ElButton>
+                            ),
+                          }}
                         </ElPopconfirm>
                       </div>
                     </div>

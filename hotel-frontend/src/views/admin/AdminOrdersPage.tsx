@@ -1,7 +1,9 @@
-import { defineComponent, onMounted, ref, computed } from 'vue'
-import { ElButton, ElCard, ElMessage, ElTag, ElTabs, ElTabPane, ElEmpty, ElMessageBox, ElDialog, ElDescriptions, ElDescriptionsItem } from 'element-plus'
+import { defineComponent, onMounted, ref } from 'vue'
+import { ElButton, ElCard, ElDescriptions, ElDescriptionsItem, ElDialog, ElEmpty, ElMessage, ElMessageBox } from 'element-plus'
 import { http } from '@/lib/http'
 import type { ApiResponse, PageResponse } from '@/types/api'
+import './AdminTheme.css'
+import './AdminOrdersPage.css'
 
 type Order = {
   id: number
@@ -16,12 +18,12 @@ type Order = {
   createdAt: string
 }
 
-const statusMap: Record<string, { label: string; type: any }> = {
-  CREATED: { label: '待确认', type: 'warning' },
-  PAID: { label: '已确认', type: 'success' },
-  CHECKED_IN: { label: '已入住', type: 'primary' },
-  COMPLETED: { label: '已完成', type: 'info' },
-  CANCELED: { label: '已取消', type: 'info' },
+const statusMap: Record<string, { label: string; cls: string }> = {
+  CREATED: { label: '待确认', cls: 'status-warning' },
+  PAID: { label: '已确认', cls: 'status-success' },
+  CHECKED_IN: { label: '已入住', cls: 'status-success' },
+  COMPLETED: { label: '已完成', cls: 'status-success' },
+  CANCELED: { label: '已取消', cls: 'status-danger' },
 }
 
 export default defineComponent({
@@ -95,57 +97,66 @@ export default defineComponent({
     onMounted(load)
 
     return () => (
-      <div>
-        <ElCard style={{ marginBottom: '20px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <ElTabs v-model={activeTab.value} onTabChange={load} style={{ flex: 1, marginBottom: '-15px' }}>
-              <ElTabPane label="全部" name="ALL" />
-              <ElTabPane label="待确认" name="CREATED" />
-              <ElTabPane label="已确认" name="PAID" />
-              <ElTabPane label="已入住" name="CHECKED_IN" />
-              <ElTabPane label="已完成" name="COMPLETED" />
-              <ElTabPane label="已取消" name="CANCELED" />
-            </ElTabs>
-            <ElButton type="primary" onClick={exportOrders} style={{ marginLeft: '20px' }}>导出订单列表</ElButton>
+      <div class="admin-page">
+        <ElCard class="admin-card">
+          <div class="toolbar-row">
+            <div class="filter-tabs">
+              {[
+                { key: 'ALL', label: '全部' },
+                { key: 'CREATED', label: '待确认' },
+                { key: 'PAID', label: '已确认' },
+                { key: 'CHECKED_IN', label: '已入住' },
+                { key: 'COMPLETED', label: '已完成' },
+                { key: 'CANCELED', label: '已取消' },
+              ].map((tab) => (
+                <button
+                  key={tab.key}
+                  class={`filter-tab ${activeTab.value === tab.key ? 'active' : ''}`}
+                  onClick={() => {
+                    activeTab.value = tab.key
+                    load()
+                  }}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+            <ElButton type="primary" class="admin-primary-btn" onClick={exportOrders}>导出订单列表</ElButton>
           </div>
         </ElCard>
 
         <div v-loading={loading.value}>
           {items.value.length === 0 ? (
-            <ElCard>
+            <ElCard class="admin-card">
               <ElEmpty description="暂无对应状态的订单数据" />
             </ElCard>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <div class="order-cards">
               {items.value.map((order) => {
-                const st = statusMap[order.status] || { label: order.status, type: 'info' }
+                const st = statusMap[order.status] || { label: order.status, cls: 'status-danger' }
                 return (
-                  <ElCard key={order.id} shadow="hover" bodyStyle={{ padding: '20px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                      <div style={{ flex: 1 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
-                          <span style={{ fontSize: '16px', fontWeight: 'bold', color: '#303133' }}>{order.hotelName}</span>
-                          <ElTag type={st.type} size="small" effect="light">{st.label}</ElTag>
-                          <span style={{ fontSize: '13px', color: '#909399' }}>订单号：{order.orderNo}</span>
-                        </div>
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '24px', fontSize: '14px', color: '#606266' }}>
-                          <div><span style={{ color: '#909399' }}>下单用户：</span>{order.username}</div>
-                          <div><span style={{ color: '#909399' }}>房型：</span>{order.roomTypeName}</div>
-                          <div><span style={{ color: '#909399' }}>入住时段：</span>{order.checkinDate} 至 {order.checkoutDate}</div>
-                          <div><span style={{ color: '#909399' }}>下单时间：</span>{order.createdAt.replace('T', ' ')}</div>
-                        </div>
+                  <ElCard key={order.id} class="admin-card order-card">
+                    <div class="order-head">
+                      <div class="order-title-block">
+                        <div class="order-hotel">{order.hotelName}</div>
+                        <span class={`status-pill ${st.cls}`}>{st.label}</span>
+                        <span class="order-no">订单号：{order.orderNo}</span>
                       </div>
-                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '12px', minWidth: '120px' }}>
-                        <div style={{ fontSize: '20px', fontWeight: 'bold', color: '#f56c6c' }}>
-                          ¥ {Number(order.amount).toFixed(2)}
-                        </div>
-                        <div style={{ display: 'flex', gap: '8px' }}>
-                          <ElButton type="primary" plain size="small" onClick={() => viewDetail(order)}>查看详情</ElButton>
+                      <div class="order-right">
+                        <div class="order-amount">¥ {Number(order.amount).toFixed(2)}</div>
+                        <div class="order-actions">
+                          <button class="order-detail-btn" onClick={() => viewDetail(order)}>查看详情</button>
                           {order.status !== 'CANCELED' && order.status !== 'COMPLETED' && (
-                            <ElButton type="danger" plain size="small" onClick={() => cancelAbnormal(order)}>异常处理</ElButton>
+                            <button class="action-btn action-danger" onClick={() => cancelAbnormal(order)}>异常处理</button>
                           )}
                         </div>
                       </div>
+                    </div>
+                    <div class="order-grid">
+                      <div><span class="order-label">房型</span>{order.roomTypeName}</div>
+                      <div><span class="order-label">用户</span>{order.username}</div>
+                      <div><span class="order-label">入住时段</span>{order.checkinDate} 至 {order.checkoutDate}</div>
+                      <div><span class="order-label">下单时间</span>{order.createdAt.replace('T', ' ')}</div>
                     </div>
                   </ElCard>
                 )
@@ -166,9 +177,9 @@ export default defineComponent({
               <ElDescriptionsItem label="订单总价">¥ {Number(currentOrder.value.amount).toFixed(2)}</ElDescriptionsItem>
               <ElDescriptionsItem label="下单时间">{currentOrder.value.createdAt.replace('T', ' ')}</ElDescriptionsItem>
               <ElDescriptionsItem label="订单状态">
-                <ElTag type={statusMap[currentOrder.value.status]?.type}>
-                  {statusMap[currentOrder.value.status]?.label}
-                </ElTag>
+                <span class={`status-pill ${statusMap[currentOrder.value.status]?.cls || 'status-danger'}`}>
+                  {statusMap[currentOrder.value.status]?.label || currentOrder.value.status}
+                </span>
               </ElDescriptionsItem>
             </ElDescriptions>
           )}
@@ -177,4 +188,3 @@ export default defineComponent({
     )
   },
 })
-

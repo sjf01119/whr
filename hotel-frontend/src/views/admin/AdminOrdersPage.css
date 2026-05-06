@@ -1,0 +1,111 @@
+.order-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.order-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.order-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
+}
+
+.order-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.order-title-block {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.order-hotel {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.order-no {
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+.order-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.order-amount {
+  font-size: 18px;
+  font-weight: 700;
+  color: #3b82f6;
+}
+
+.order-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.order-detail-btn {
+  border: 1px solid #3b82f6;
+  border-radius: 8px;
+  background: #fff;
+  color: #3b82f6;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.order-detail-btn:hover {
+  background: #3b82f6;
+  color: #fff;
+}
+
+.order-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(240px, 1fr));
+  gap: 12px 20px;
+  font-size: 14px;
+  color: #4b5563;
+}
+
+.order-grid > div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.order-label {
+  color: #9ca3af;
+}
+
+@media (max-width: 992px) {
+  .order-head {
+    flex-direction: column;
+  }
+
+  .order-right {
+    width: 100%;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .order-grid {
+    grid-template-columns: 1fr;
+  }
+}

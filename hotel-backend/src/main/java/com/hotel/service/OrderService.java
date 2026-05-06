@@ -122,15 +122,7 @@ public class OrderService {
     if (order == null || !order.getUserId().equals(userId)) {
       throw new BusinessException("订单不存在");
     }
-    if (order.getStatus() != OrderStatus.CREATED) {
-      throw new BusinessException("订单状态不允许支付");
-    }
-    int updated = roomTypeMapper.deductStock(order.getRoomTypeId(), order.getRoomCount());
-    if (updated != 1) {
-      throw new BusinessException("库存不足");
-    }
-    int ok = bookingOrderMapper.updateStatus(orderId, OrderStatus.CREATED, OrderStatus.PAID);
-    if (ok != 1) throw new BusinessException("订单状态变更失败");
+    payCreatedOrder(order, "订单状态不允许支付");
   }
 
   @Transactional
@@ -139,15 +131,7 @@ public class OrderService {
     if (order == null || !order.getHotelId().equals(hotelId)) {
       throw new BusinessException("订单不存在");
     }
-    if (order.getStatus() != OrderStatus.CREATED) {
-      throw new BusinessException("订单状态不允许确认接单");
-    }
-    int updated = roomTypeMapper.deductStock(order.getRoomTypeId(), order.getRoomCount());
-    if (updated != 1) {
-      throw new BusinessException("库存不足");
-    }
-    int ok = bookingOrderMapper.updateStatus(orderId, OrderStatus.CREATED, OrderStatus.PAID);
-    if (ok != 1) throw new BusinessException("订单状态变更失败");
+    payCreatedOrder(order, "订单状态不允许确认接单");
   }
 
   public void cancelUserOrder(long userId, long orderId) {
@@ -177,6 +161,7 @@ public class OrderService {
     if (ok != 1) throw new BusinessException("订单状态不允许入住");
   }
 
+  @Transactional
   public void checkout(long hotelId, long orderId) {
     BookingOrder order = bookingOrderMapper.findById(orderId);
     if (order == null || !order.getHotelId().equals(hotelId)) {
@@ -184,10 +169,28 @@ public class OrderService {
     }
     int ok = bookingOrderMapper.updateStatus(orderId, OrderStatus.CHECKED_IN, OrderStatus.COMPLETED);
     if (ok != 1) throw new BusinessException("订单状态不允许退房");
+    int stockUpdated = roomTypeMapper.addStock(order.getRoomTypeId(), order.getRoomCount());
+    if (stockUpdated != 1) {
+      throw new BusinessException("退房归还库存失败");
+    }
   }
 
   private String genOrderNo() {
     String raw = UUID.randomUUID().toString().replace("-", "");
     return raw.substring(0, 20);
+  }
+
+  private void payCreatedOrder(BookingOrder order, String invalidStatusMessage) {
+    if (order.getStatus() != OrderStatus.CREATED) {
+      throw new BusinessException(invalidStatusMessage);
+    }
+    int updated = roomTypeMapper.deductStock(order.getRoomTypeId(), order.getRoomCount());
+    if (updated != 1) {
+      throw new BusinessException("库存不足");
+    }
+    int ok = bookingOrderMapper.updateStatus(order.getId(), OrderStatus.CREATED, OrderStatus.PAID);
+    if (ok != 1) {
+      throw new BusinessException("订单状态变更失败");
+    }
   }
 }

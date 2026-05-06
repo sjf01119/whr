@@ -1,7 +1,9 @@
 import { defineComponent, onMounted, ref } from 'vue'
-import { ElButton, ElCard, ElMessage, ElTable, ElTableColumn, ElTag, ElTabs, ElTabPane, ElDialog, ElDescriptions, ElDescriptionsItem } from 'element-plus'
+import { ElCard, ElDescriptions, ElDescriptionsItem, ElDialog, ElMessage, ElTable, ElTableColumn } from 'element-plus'
 import { http } from '@/lib/http'
 import type { ApiResponse, PageResponse } from '@/types/api'
+import { CloseBold, View } from '@element-plus/icons-vue'
+import './AdminTheme.css'
 
 type User = {
   id: number
@@ -45,54 +47,71 @@ export default defineComponent({
     onMounted(load)
 
     return () => (
-      <div>
-        <ElCard style={{ marginBottom: '20px' }}>
-          <ElTabs v-model={activeTab.value} onTabChange={load}>
-            <ElTabPane label="全部" name="ALL" />
-            <ElTabPane label="正常" name="ENABLED" />
-            <ElTabPane label="禁用" name="DISABLED" />
-          </ElTabs>
+      <div class="admin-page">
+        <ElCard class="admin-card">
+          <div class="filter-tabs">
+            {[
+              { key: 'ALL', label: '全部' },
+              { key: 'ENABLED', label: '正常' },
+              { key: 'DISABLED', label: '禁用' },
+            ].map((tab) => (
+              <button
+                key={tab.key}
+                class={`filter-tab ${activeTab.value === tab.key ? 'active' : ''}`}
+                onClick={() => {
+                  activeTab.value = tab.key
+                  load()
+                }}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
         </ElCard>
 
-        <ElCard>
-          <ElTable data={items.value} v-loading={loading.value} style="width: 100%" v-slots={{
-            empty: () => <div style={{ padding: '40px 0', textAlign: 'center', color: '#909399' }}>暂无注册用户数据</div>
+        <ElCard class="admin-card">
+          <div class="table-wrap">
+          <ElTable data={items.value} class="admin-table" v-loading={loading.value} v-slots={{
+            empty: () => <div class="admin-empty">暂无注册用户数据</div>
           }}>
-            <ElTableColumn prop="id" label="ID" width={90} />
-            <ElTableColumn prop="username" label="用户名" />
+            <ElTableColumn prop="id" label="ID" width={90} align="center" />
+            <ElTableColumn prop="username" label="用户名" align="center" />
             <ElTableColumn
               prop="status"
               label="状态"
               width={120}
+              align="center"
               v-slots={{
-                default: ({ row }: { row: User }) => (
-                  <ElTag type={row.status === 'ENABLED' ? 'success' : 'info'}>
-                    {row.status === 'ENABLED' ? '正常' : '禁用'}
-                  </ElTag>
-                ),
+                default: ({ row }: { row: User }) => <span class={`status-pill ${row.status === 'ENABLED' ? 'status-success' : 'status-danger'}`}>{row.status === 'ENABLED' ? '正常' : '禁用'}</span>,
               }}
             />
             <ElTableColumn
               label="操作"
               width={200}
+              align="center"
               v-slots={{
                 default: ({ row }: { row: User }) => (
-                  <>
-                    <ElButton size="small" type="primary" link onClick={() => viewDetail(row)}>查看详情</ElButton>
+                  <div class="action-group">
+                    <button class="action-btn action-primary" onClick={() => viewDetail(row)}>
+                      <el-icon><View /></el-icon>
+                      查看详情
+                    </button>
                     {row.status === 'DISABLED' ? (
-                      <ElButton size="small" type="success" link onClick={() => toggleStatus(row.id, true)}>
+                      <button class="action-btn action-success" onClick={() => toggleStatus(row.id, true)}>
                         启用
-                      </ElButton>
+                      </button>
                     ) : (
-                      <ElButton size="small" type="danger" link onClick={() => toggleStatus(row.id, false)}>
+                      <button class="action-btn action-danger" onClick={() => toggleStatus(row.id, false)}>
+                        <el-icon><CloseBold /></el-icon>
                         禁用
-                      </ElButton>
+                      </button>
                     )}
-                  </>
+                  </div>
                 ),
               }}
             />
           </ElTable>
+          </div>
         </ElCard>
 
         <ElDialog v-model={detailVisible.value} title="用户详情" width="500px">
@@ -102,9 +121,9 @@ export default defineComponent({
               <ElDescriptionsItem label="用户名">{currentUser.value.username}</ElDescriptionsItem>
               <ElDescriptionsItem label="账号角色">普通用户</ElDescriptionsItem>
               <ElDescriptionsItem label="账号状态">
-                <ElTag type={currentUser.value.status === 'ENABLED' ? 'success' : 'info'}>
+                <span class={`status-pill ${currentUser.value.status === 'ENABLED' ? 'status-success' : 'status-danger'}`}>
                   {currentUser.value.status === 'ENABLED' ? '正常' : '禁用'}
-                </ElTag>
+                </span>
               </ElDescriptionsItem>
             </ElDescriptions>
           )}
@@ -113,4 +132,3 @@ export default defineComponent({
     )
   },
 })
-

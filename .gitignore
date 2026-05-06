@@ -1,0 +1,17 @@
+.env
+.env.*
+!.env.example
+
+# Backend
+hotel-backend/target/
+hotel-backend/.idea/
+hotel-backend/uploads/
+
+# Frontend
+hotel-frontend/node_modules/
+hotel-frontend/dist/
+hotel-frontend/.eslintcache
+
+# OS / IDE
+.DS_Store
+Thumbs.db

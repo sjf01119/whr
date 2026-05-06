@@ -1,16 +1,16 @@
-package com.hotel.model;
+package com.hotel.dto;
 
 import java.time.LocalDateTime;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
-public class SysUser {
+@AllArgsConstructor
+public class ProfileInfoResponse {
   private Long id;
   private String username;
-  private String passwordHash;
+  private String role;
   private String phone;
   private String avatar;
-  private Role role;
-  private UserStatus status;
   private LocalDateTime createdAt;
 }

@@ -1,8 +1,11 @@
 import axios from 'axios'
 import { useAuthStore } from '@/stores/auth'
 
+const rawApiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8080'
+export const API_BASE_URL = rawApiBaseUrl.replace(/\/+$/, '')
+
 export const http = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8080',
+  baseURL: API_BASE_URL,
   timeout: 15000,
 })
 
@@ -27,3 +30,13 @@ http.interceptors.response.use(
   },
 )
 
+export function resolveBackendAssetUrl(path: string | null | undefined): string | null {
+  if (!path) return null
+  const trimmed = path.trim()
+  if (!trimmed) return null
+  if (/^(https?:)?\/\//i.test(trimmed) || trimmed.startsWith('data:') || trimmed.startsWith('blob:')) {
+    return trimmed
+  }
+  const normalizedPath = trimmed.startsWith('/') ? trimmed : `/${trimmed}`
+  return `${API_BASE_URL}${normalizedPath}`
+}

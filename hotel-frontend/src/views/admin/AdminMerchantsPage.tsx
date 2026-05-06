@@ -1,7 +1,9 @@
 import { defineComponent, onMounted, ref, reactive } from 'vue'
-import { ElButton, ElCard, ElMessage, ElTable, ElTableColumn, ElTag, ElDialog, ElForm, ElFormItem, ElInput } from 'element-plus'
+import { ElButton, ElCard, ElDialog, ElForm, ElFormItem, ElInput, ElMessage, ElTable, ElTableColumn } from 'element-plus'
 import { http } from '@/lib/http'
 import type { ApiResponse, PageResponse } from '@/types/api'
+import { Check, CloseBold, Edit, Plus, VideoPlay } from '@element-plus/icons-vue'
+import './AdminTheme.css'
 
 type Merchant = {
   id: number
@@ -94,64 +96,73 @@ export default defineComponent({
     onMounted(load)
 
     return () => (
-      <div>
-        <ElCard style={{ marginBottom: '20px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ fontSize: '16px', fontWeight: 'bold' }}>商家管理</span>
-            <ElButton type="primary" onClick={handleAdd}>新增商家</ElButton>
+      <div class="admin-page">
+        <ElCard class="admin-card">
+          <div class="toolbar-row">
+            <span class="page-title">商家管理</span>
+            <ElButton type="primary" class="admin-primary-btn" onClick={handleAdd}>
+              <el-icon><Plus /></el-icon>
+              新增商家
+            </ElButton>
           </div>
         </ElCard>
         
-        <ElCard>
-          <ElTable data={items.value} v-loading={loading.value} style="width: 100%" v-slots={{
-            empty: () => <div style={{ padding: '40px 0', textAlign: 'center', color: '#909399' }}>暂无入驻商家数据</div>
-          }}>
-            <ElTableColumn prop="id" label="ID" width={90} />
-            <ElTableColumn prop="username" label="账号" />
+        <ElCard class="admin-card">
+          <div class="table-wrap">
+            <ElTable data={items.value} class="admin-table" v-loading={loading.value} v-slots={{
+              empty: () => <div class="admin-empty">暂无入驻商家数据</div>
+            }}>
+            <ElTableColumn prop="id" label="ID" width={90} align="center" />
+            <ElTableColumn prop="username" label="账号" align="center" />
             <ElTableColumn
               prop="status"
               label="状态"
               width={120}
+              align="center"
               v-slots={{
                 default: ({ row }: { row: Merchant }) => {
-                  const type = row.status === 'ENABLED' ? 'success' : row.status === 'PENDING' ? 'warning' : 'info'
                   const text = row.status === 'ENABLED' ? '启用' : row.status === 'PENDING' ? '待审核' : '禁用'
-                  return <ElTag type={type}>{text}</ElTag>
+                  const cls = row.status === 'ENABLED' ? 'status-success' : row.status === 'PENDING' ? 'status-warning' : 'status-danger'
+                  return <span class={`status-pill ${cls}`}>{text}</span>
                 },
               }}
             />
             <ElTableColumn
               label="操作"
               width={260}
+              align="center"
               v-slots={{
                 default: ({ row }: { row: Merchant }) => (
-                  <>
-                    <ElButton size="small" type="primary" link onClick={() => handleEdit(row)}>
+                  <div class="action-group">
+                    <button class="action-btn action-primary" onClick={() => handleEdit(row)}>
+                      <el-icon><Edit /></el-icon>
                       编辑
-                    </ElButton>
-                    <ElButton
-                      type="primary"
-                      link
-                      size="small"
+                    </button>
+                    <button
+                      class="action-btn action-primary"
                       disabled={row.status !== 'PENDING'}
                       onClick={() => approve(row.id)}
                     >
+                      <el-icon><Check /></el-icon>
                       审核通过
-                    </ElButton>
+                    </button>
                     {row.status === 'DISABLED' ? (
-                      <ElButton size="small" type="success" link onClick={() => toggle(row.id, true)}>
+                      <button class="action-btn action-success" onClick={() => toggle(row.id, true)}>
+                        <el-icon><VideoPlay /></el-icon>
                         启用
-                      </ElButton>
+                      </button>
                     ) : (
-                      <ElButton size="small" type="danger" link onClick={() => toggle(row.id, false)}>
+                      <button class="action-btn action-danger" onClick={() => toggle(row.id, false)}>
+                        <el-icon><CloseBold /></el-icon>
                         禁用
-                      </ElButton>
+                      </button>
                     )}
-                  </>
+                  </div>
                 ),
               }}
             />
-          </ElTable>
+            </ElTable>
+          </div>
         </ElCard>
 
         <ElDialog
@@ -187,4 +198,3 @@ export default defineComponent({
     )
   },
 })
-

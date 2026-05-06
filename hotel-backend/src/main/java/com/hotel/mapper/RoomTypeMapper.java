@@ -32,5 +32,7 @@ public interface RoomTypeMapper {
 
   @Update("update room_type set stock = stock - #{delta} where id = #{id} and stock >= #{delta}")
   int deductStock(@Param("id") long id, @Param("delta") int delta);
-}
 
+  @Update("update room_type set stock = stock + #{delta} where id = #{id}")
+  int addStock(@Param("id") long id, @Param("delta") int delta);
+}

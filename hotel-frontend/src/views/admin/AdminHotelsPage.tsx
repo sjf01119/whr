@@ -1,7 +1,9 @@
 import { defineComponent, onMounted, ref } from 'vue'
-import { ElButton, ElCard, ElMessage, ElTable, ElTableColumn, ElTag, ElTabs, ElTabPane } from 'element-plus'
+import { ElCard, ElMessage, ElTable, ElTableColumn } from 'element-plus'
 import { http } from '@/lib/http'
 import type { ApiResponse, PageResponse } from '@/types/api'
+import { CloseBold, View } from '@element-plus/icons-vue'
+import './AdminTheme.css'
 
 type Hotel = {
   id: number
@@ -23,8 +25,9 @@ export default defineComponent({
     async function load() {
       loading.value = true
       try {
+        const statusParam = activeTab.value === 'DISABLED' ? 'OFFLINE' : activeTab.value
         const resp = await http.get<ApiResponse<PageResponse<Hotel>>>('/api/admin/hotels', {
-          params: { status: activeTab.value, page: 1, pageSize: 50 },
+          params: { status: statusParam, page: 1, pageSize: 50 },
         })
         if (resp.data.success) items.value = resp.data.data.items
       } finally {
@@ -41,69 +44,79 @@ export default defineComponent({
     onMounted(load)
 
     return () => (
-      <div>
-        <ElCard style={{ marginBottom: '20px' }}>
-          <ElTabs v-model={activeTab.value} onTabChange={load}>
-            <ElTabPane label="全部" name="ALL" />
-            <ElTabPane label="营业中" name="ONLINE" />
-            <ElTabPane label="已歇业/禁用" name="OFFLINE" />
-          </ElTabs>
+      <div class="admin-page">
+        <ElCard class="admin-card">
+          <div class="filter-tabs">
+            {[
+              { key: 'ALL', label: '全部' },
+              { key: 'ONLINE', label: '营业中' },
+              { key: 'OFFLINE', label: '已歇业' },
+              { key: 'DISABLED', label: '禁用' },
+            ].map((tab) => (
+              <button
+                key={tab.key}
+                class={`filter-tab ${activeTab.value === tab.key ? 'active' : ''}`}
+                onClick={() => {
+                  activeTab.value = tab.key
+                  load()
+                }}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
         </ElCard>
 
-        <ElCard>
-          <ElTable data={items.value} v-loading={loading.value} style="width: 100%" v-slots={{
-            empty: () => <div style={{ padding: '40px 0', textAlign: 'center', color: '#909399' }}>暂无对应状态的酒店数据</div>
+        <ElCard class="admin-card">
+          <div class="table-wrap">
+          <ElTable data={items.value} class="admin-table" v-loading={loading.value} v-slots={{
+            empty: () => <div class="admin-empty">暂无对应状态的酒店数据</div>
           }}>
-            <ElTableColumn prop="id" label="ID" width={80} />
-            <ElTableColumn prop="name" label="酒店名称" />
-            <ElTableColumn prop="merchantId" label="所属商家ID" width={100} />
-            <ElTableColumn prop="address" label="地址" showOverflowTooltip />
+            <ElTableColumn prop="id" label="ID" width={80} align="center" />
+            <ElTableColumn prop="name" label="酒店名称" minWidth={170} align="center" />
+            <ElTableColumn prop="merchantId" label="所属商家ID" width={120} align="center" />
+            <ElTableColumn prop="address" label="地址" minWidth={260} showOverflowTooltip align="center" />
             <ElTableColumn
               prop="status"
               label="营业状态"
               width={120}
+              align="center"
               v-slots={{
-                default: ({ row }: { row: Hotel }) => (
-                  <ElTag type={row.status === 'ONLINE' ? 'success' : 'info'}>
-                    {row.status === 'ONLINE' ? '营业中' : '已歇业/禁用'}
-                  </ElTag>
-                ),
+                default: ({ row }: { row: Hotel }) => {
+                  const isOnline = row.status === 'ONLINE'
+                  return <span class={`status-pill ${isOnline ? 'status-success' : 'status-danger'}`}>{isOnline ? '营业中' : '已歇业/禁用'}</span>
+                },
               }}
             />
             <ElTableColumn
               label="操作"
               width={200}
+              align="center"
               v-slots={{
                 default: ({ row }: { row: Hotel }) => (
-                  <>
-                    <ElButton size="small" type="primary" link>查看详情</ElButton>
+                  <div class="action-group">
+                    <button class="action-btn action-primary">
+                      <el-icon><View /></el-icon>
+                      查看详情
+                    </button>
                     {row.status === 'OFFLINE' ? (
-                      <ElButton
-                        type="success"
-                        link
-                        size="small"
-                        onClick={() => toggleStatus(row.id, true)}
-                      >
+                      <button class="action-btn action-success" onClick={() => toggleStatus(row.id, true)}>
                         启用
-                      </ElButton>
+                      </button>
                     ) : (
-                      <ElButton
-                        type="danger"
-                        link
-                        size="small"
-                        onClick={() => toggleStatus(row.id, false)}
-                      >
+                      <button class="action-btn action-danger" onClick={() => toggleStatus(row.id, false)}>
+                        <el-icon><CloseBold /></el-icon>
                         禁用
-                      </ElButton>
+                      </button>
                     )}
-                  </>
+                  </div>
                 ),
               }}
             />
           </ElTable>
+          </div>
         </ElCard>
       </div>
     )
   },
 })
-

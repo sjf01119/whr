@@ -45,7 +45,7 @@ public interface SysUserMapper {
   List<SysUser> listAll(@Param("limit") int limit, @Param("offset") int offset);
 
   @Insert(
-      "insert into sys_user(username,password_hash,role,status,created_at) values(#{username},#{passwordHash},#{role},#{status},#{createdAt})")
+      "insert into sys_user(username,password_hash,phone,avatar,role,status,created_at) values(#{username},#{passwordHash},#{phone},#{avatar},#{role},#{status},#{createdAt})")
   @Options(useGeneratedKeys = true, keyProperty = "id")
   int insert(SysUser user);
 
@@ -54,5 +54,10 @@ public interface SysUserMapper {
 
   @Update("update sys_user set status = #{status} where id = #{id}")
   int updateStatus(@Param("id") long id, @Param("status") UserStatus status);
-}
 
+  @Update("update sys_user set password_hash = #{passwordHash} where id = #{id}")
+  int updatePasswordHash(@Param("id") long id, @Param("passwordHash") String passwordHash);
+
+  @Update("update sys_user set avatar = #{avatar} where id = #{id}")
+  int updateAvatar(@Param("id") long id, @Param("avatar") String avatar);
+}

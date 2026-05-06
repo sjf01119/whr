@@ -12,23 +12,26 @@ import AdminDashboardPage from '@/views/admin/AdminDashboardPage'
 import AdminHotelsPage from '@/views/admin/AdminHotelsPage'
 import AdminMerchantsPage from '@/views/admin/AdminMerchantsPage'
 import AdminOrdersPage from '@/views/admin/AdminOrdersPage'
+import AdminProfilePage from '@/views/admin/AdminProfilePage'
 import AdminUsersPage from '@/views/admin/AdminUsersPage'
 
 import MerchantDashboardPage from '@/views/merchant/MerchantDashboardPage'
 import MerchantHotelPage from '@/views/merchant/MerchantHotelPage'
 import MerchantOrdersPage from '@/views/merchant/MerchantOrdersPage'
+import MerchantProfilePage from '@/views/merchant/MerchantProfilePage'
 import MerchantRoomTypesPage from '@/views/merchant/MerchantRoomTypesPage'
 
 import UserHotelDetailPage from '@/views/user/UserHotelDetailPage'
 import UserHotelsPage from '@/views/user/UserHotelsPage'
 import UserOrdersPage from '@/views/user/UserOrdersPage'
+import UserProfilePage from '@/views/user/UserProfilePage'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
       path: '/',
-      redirect: '/user/hotels',
+      redirect: '/login',
     },
     {
       path: '/403',
@@ -64,6 +67,7 @@ const router = createRouter({
         { path: 'hotel-supervise', component: AdminHotelsPage },
         { path: 'order-supervise', component: AdminOrdersPage },
         { path: 'user-manage', component: AdminUsersPage },
+        { path: 'profile', component: AdminProfilePage },
         { path: '', redirect: '/admin/dashboard' },
       ],
     },
@@ -76,6 +80,7 @@ const router = createRouter({
         { path: 'hotel', component: MerchantHotelPage },
         { path: 'room-types', component: MerchantRoomTypesPage },
         { path: 'orders', component: MerchantOrdersPage },
+        { path: 'profile', component: MerchantProfilePage },
         { path: '', redirect: '/merchant/dashboard' },
       ],
     },
@@ -88,6 +93,7 @@ const router = createRouter({
         { path: 'hotels', component: UserHotelsPage },
         { path: 'hotels/:id', component: UserHotelDetailPage },
         { path: 'orders', component: UserOrdersPage },
+        { path: 'profile', component: UserProfilePage },
         { path: '', redirect: '/user/hotels' },
       ],
     },

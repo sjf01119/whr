@@ -46,11 +46,15 @@ public class DevDataInitializer implements ApplicationRunner {
   @Override
   public void run(ApplicationArguments args) {
     ensureBookingGuestPhoneColumn();
+    ensureSysUserPhoneColumn();
+    ensureSysUserAvatarColumn();
     if (sysUserMapper.countAll() > 0) return;
 
     SysUser admin = new SysUser();
     admin.setUsername("admin");
     admin.setPasswordHash(encoder.encode("admin123"));
+    admin.setPhone("13800000001");
+    admin.setAvatar("");
     admin.setRole(Role.ADMIN);
     admin.setStatus(UserStatus.ENABLED);
     admin.setCreatedAt(LocalDateTime.now());
@@ -59,6 +63,8 @@ public class DevDataInitializer implements ApplicationRunner {
     SysUser merchant = new SysUser();
     merchant.setUsername("merchant1");
     merchant.setPasswordHash(encoder.encode("merchant123"));
+    merchant.setPhone("13800000002");
+    merchant.setAvatar("");
     merchant.setRole(Role.MERCHANT);
     merchant.setStatus(UserStatus.ENABLED);
     merchant.setCreatedAt(LocalDateTime.now());
@@ -67,6 +73,8 @@ public class DevDataInitializer implements ApplicationRunner {
     SysUser user1 = new SysUser();
     user1.setUsername("user1");
     user1.setPasswordHash(encoder.encode("user123"));
+    user1.setPhone("13800000003");
+    user1.setAvatar("");
     user1.setRole(Role.USER);
     user1.setStatus(UserStatus.ENABLED);
     user1.setCreatedAt(LocalDateTime.now());
@@ -75,6 +83,8 @@ public class DevDataInitializer implements ApplicationRunner {
     SysUser user2 = new SysUser();
     user2.setUsername("user2");
     user2.setPasswordHash(encoder.encode("user123"));
+    user2.setPhone("13800000004");
+    user2.setAvatar("");
     user2.setRole(Role.USER);
     user2.setStatus(UserStatus.ENABLED);
     user2.setCreatedAt(LocalDateTime.now());
@@ -194,6 +204,33 @@ public class DevDataInitializer implements ApplicationRunner {
             Integer.class);
     if (count != null && count == 0) {
       jdbcTemplate.execute("alter table booking_guest add column phone varchar(32) not null default ''");
+    }
+  }
+
+  private void ensureSysUserPhoneColumn() {
+    Integer count =
+        jdbcTemplate.queryForObject(
+            "select count(1) from information_schema.columns where table_schema = database() and table_name = 'sys_user' and column_name = 'phone'",
+            Integer.class);
+    if (count != null && count == 0) {
+      jdbcTemplate.execute("alter table sys_user add column phone varchar(32) not null default ''");
+    }
+  }
+
+  private void ensureSysUserAvatarColumn() {
+    Integer count =
+        jdbcTemplate.queryForObject(
+            "select count(1) from information_schema.columns where table_schema = database() and table_name = 'sys_user' and column_name = 'avatar'",
+            Integer.class);
+    if (count != null && count == 0) {
+      jdbcTemplate.execute("alter table sys_user add column avatar varchar(255) not null default '' comment '用户头像地址'");
+    }
+    Integer oldCount =
+        jdbcTemplate.queryForObject(
+            "select count(1) from information_schema.columns where table_schema = database() and table_name = 'sys_user' and column_name = 'avatar_url'",
+            Integer.class);
+    if (oldCount != null && oldCount > 0) {
+      jdbcTemplate.execute("update sys_user set avatar = avatar_url where avatar = '' and avatar_url <> ''");
     }
   }
 }

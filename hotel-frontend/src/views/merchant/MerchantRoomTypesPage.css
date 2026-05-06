@@ -1,0 +1,221 @@
+.merchant-roomtypes-page {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.roomtypes-toolbar-card,
+.roomtypes-empty-card,
+.roomtype-card {
+  border: none;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+}
+
+.toolbar-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.page-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.roomtypes-add-btn.el-button {
+  height: 38px;
+  border-radius: 8px;
+  border: 1px solid #3b82f6;
+  background: #3b82f6;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.roomtypes-add-btn.el-button:hover {
+  border-color: #2563eb;
+  background: #2563eb;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.roomtypes-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+.roomtype-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.roomtype-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
+}
+
+.roomtype-card-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+
+.roomtype-main {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.roomtype-image-wrap {
+  width: 152px;
+  height: 112px;
+  border-radius: 8px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.roomtype-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.roomtype-image-wrap:hover .roomtype-image {
+  transform: scale(1.05);
+}
+
+.roomtype-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.roomtype-name-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.roomtype-name {
+  font-size: 16px;
+  line-height: 1.4;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.roomtype-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #4b5563;
+}
+
+.roomtype-meta span + span::before {
+  content: '|';
+  color: #d1d5db;
+  margin-right: 10px;
+}
+
+.roomtype-facilities {
+  font-size: 12px;
+  line-height: 1.6;
+  color: #9ca3af;
+}
+
+.roomtype-stock {
+  font-size: 13px;
+  font-weight: 600;
+  color: #10b981;
+}
+
+.roomtype-side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 14px;
+  flex-shrink: 0;
+}
+
+.roomtype-price {
+  font-size: 18px;
+  font-weight: 700;
+  color: #3b82f6;
+}
+
+.roomtype-price span {
+  font-size: 14px;
+  color: #9ca3af;
+  font-weight: 400;
+}
+
+.roomtype-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.roomtype-edit-btn.el-button,
+.roomtype-delete-btn.el-button {
+  border-radius: 4px;
+  border-width: 1px;
+  border-style: solid;
+  background: #fff;
+  font-size: 13px;
+  transition: all 0.3s ease;
+}
+
+.roomtype-edit-btn.el-button {
+  border-color: #3b82f6;
+  color: #3b82f6;
+}
+
+.roomtype-edit-btn.el-button:hover {
+  background: #3b82f6;
+  color: #fff;
+}
+
+.roomtype-delete-btn.el-button {
+  border-color: #ef4444;
+  color: #ef4444;
+}
+
+.roomtype-delete-btn.el-button:hover {
+  background: #ef4444;
+  color: #fff;
+}
+
+@media (min-width: 1400px) {
+  .roomtypes-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 992px) {
+  .roomtype-card-content {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .roomtype-main {
+    width: 100%;
+    align-items: flex-start;
+  }
+
+  .roomtype-image-wrap {
+    width: 132px;
+    height: 96px;
+  }
+
+  .roomtype-side {
+    width: 100%;
+    align-items: flex-start;
+  }
+}
